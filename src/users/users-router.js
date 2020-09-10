@@ -105,7 +105,6 @@ usersRouter.route('/:user_id')
           username,
           password: hashedPassword
         }
-        console.log(updatedHashedUser);
         return UsersService.updateUser(
           req.app.get('db'),
           req.params.user_id,
@@ -126,6 +125,39 @@ usersRouter.route('/:user_id')
     //   })
     //   .catch(next);
   });
+usersRouter.route('/:user_id/blog')
+  .all((req, res, next) => {
+    UsersService.getUserById(
+      req.app.get('db'),
+      req.params.user_id
+    )
+      .then(user => {
+        if (!user) {
+          return res.status(404).json({
+            error: { message: `User does not exist` }
+          });
+        }
+        res.user = user;
+        next();
+      })
+      .catch(next);
+  })
+  .get(jsonBodyParser, (req, res, next) => {
+    UsersService.getUserById(req.app.get('db'), req.params.user_id)
+      .then(user => {
+        res.status(200).send({blogpost: user.blogpost})
+      })
+      .catch(next);
+  })
+  .patch(jsonBodyParser, (req, res, next) => {
+    console.log(req.body)
+    const { blogpost } = req.body;
+    UsersService.updateBlog(req.app.get('db'), req.params.user_id, blogpost)
+      .then(rows => {
+        res.status(204).end();
+      })
+      .catch(next);
+  })
   
 
 module.exports = usersRouter

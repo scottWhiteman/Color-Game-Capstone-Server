@@ -29,6 +29,11 @@ const UsersService = {
       .where({ id })
       .update(newUser)
   },
+  updateBlog(db, id, newBlog) {
+    return db('colorgame_users')
+      .where({id})
+      .update('blogpost', newBlog)
+  },
   hashPassword(password) {
     return bcrypt.hash(password, 12);
   },

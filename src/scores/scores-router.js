@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 const ScoresService = require('./scores-service');
 const { requireAuth } = require('../middlewares/jwt-auth');
-const { restart } = require('nodemon');
 
 const scoresRouter = express.Router();
 const jsonBodyParser = express.json();
@@ -21,7 +20,7 @@ scoresRouter.route('/')
 
     for (const [key, value] of Object.entries(newScore)) {
       if (value == null) {
-        return restart.status(400).json({
+        return res.status(400).json({
           error: `Missing ${key} in request`
         });
       }

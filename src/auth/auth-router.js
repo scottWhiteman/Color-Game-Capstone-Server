@@ -20,7 +20,7 @@ authRouter.post('/login', jsonBodyParser, (req, res, next) => {
   for (const [key, value] of Object.entries(loginUser)) {
     if (value == null) {
       return res.status(400).json({
-        error: `Missing ${key} in request`
+        error: `Missing '${key}' in request`
       });
     }
   }
@@ -29,7 +29,7 @@ authRouter.post('/login', jsonBodyParser, (req, res, next) => {
     .then(user => {
       if (!user) {
         return res.status(400).json({
-          error: 'Incorrect user or password'
+          error: 'Incorrect username or password'
         });
       }
 
@@ -37,7 +37,7 @@ authRouter.post('/login', jsonBodyParser, (req, res, next) => {
         .then(match => {
           if (!match) {
             return res.status(400).json({
-              error: 'Incorrect user or password'
+              error: 'Incorrect username or password'
             })
           }
           const sub = user.username;

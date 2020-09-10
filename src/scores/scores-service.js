@@ -28,7 +28,6 @@ const ScoresService = {
       .orderBy('topscore', 'desc')
   },
   insertScore(db, newScore) {
-    console.log(newScore);
     return db
       .insert(newScore)
       .into('colorgame_scores')
