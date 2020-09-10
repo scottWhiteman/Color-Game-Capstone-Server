@@ -17,26 +17,30 @@ usersRouter
       }
     }
 
+    //Check password meets requirements
     const passwordError = UsersService.validatePassword(password);
 
     if (passwordError) {
       return res.status(400).json({ error: passwordError });
     }
+    //Check if username exists in database
     UsersService.hasUserWithUserName(
       req.app.get('db'),
       username
     )
+      //User already taken
       .then(hasUserWithUserName => {
         if (hasUserWithUserName) {
           return res.status(400).json({ error: `Username already taken` })
         }
+        //Hash the password
         return UsersService.hashPassword(password)
           .then(hashedPassword => {
             const newUser = {
               username,
               password: hashedPassword
             }
-
+            //Create new user
             return UsersService.insertUser(req.app.get('db'), newUser)
               .then(user => {
                 res.status(201).json(username);
@@ -48,11 +52,13 @@ usersRouter
 
 usersRouter.route('/:user_id')
   .all((req, res, next) => {
+    //Find user by id
     UsersService.getUserById(
       req.app.get('db'),
       req.params.user_id
     )
       .then(user => {
+        //User not found
         if (!user) {
           return res.status(404).json({
             error: { message: `User does not exist` }
@@ -63,28 +69,26 @@ usersRouter.route('/:user_id')
       })
       .catch(next);
   })
+  //Get user and return it
   .get(jsonBodyParser, (req, res, next) => {
     UsersService.getUserById(req.app.get('db'), req.params.user_id)
       .then(user => {
-        //console.log(user.username);
         res.status(200).send({username: user.username})
       })
       .catch(next);
-    // res.status(200).send({
-    //   username: user.username
-    // });
   })
+  //Delete user at id
   .delete((req, res, next) => {
     UsersService.deleteUser(
         req.app.get('db'),
         req.params.user_id
       )
       .then(numRowsAffected => {
-        console.log(`${req.params.user_id} deleted`)
         res.status(204).end()
       })
       .catch(next);
   })
+  //Update user username and password
   .patch(jsonBodyParser, (req, res, next) => {
     const { username, password } = req.body;
     const updatedUser = { username, password };
@@ -95,10 +99,6 @@ usersRouter.route('/:user_id')
         error: { message: `Request body must contain username or password` }
       })
     }
-    // if (UsersService.hasUserWithUserName(username)) {
-
-    // }
-    
     return UsersService.hashPassword(password)
       .then(hashedPassword => {
         const updatedHashedUser = {
@@ -115,23 +115,18 @@ usersRouter.route('/:user_id')
           })
           .catch(next);
       })
-    // UsersService.updateUser(
-    //   req.app.get('db'),
-    //   req.params.user_id,
-    //   updatedUser
-    // )
-    //   .then(rows => {
-    //     res.status(204).end();
-    //   })
-    //   .catch(next);
   });
+
+//User blogpost column
 usersRouter.route('/:user_id/blog')
   .all((req, res, next) => {
+    //Search user id
     UsersService.getUserById(
       req.app.get('db'),
       req.params.user_id
     )
       .then(user => {
+        //If user not found
         if (!user) {
           return res.status(404).json({
             error: { message: `User does not exist` }
@@ -143,6 +138,7 @@ usersRouter.route('/:user_id/blog')
       .catch(next);
   })
   .get(jsonBodyParser, (req, res, next) => {
+    //Return user blog
     UsersService.getUserById(req.app.get('db'), req.params.user_id)
       .then(user => {
         res.status(200).send({blogpost: user.blogpost})
@@ -150,7 +146,7 @@ usersRouter.route('/:user_id/blog')
       .catch(next);
   })
   .patch(jsonBodyParser, (req, res, next) => {
-    console.log(req.body)
+    //Change user blog to given text
     const { blogpost } = req.body;
     UsersService.updateBlog(req.app.get('db'), req.params.user_id, blogpost)
       .then(rows => {

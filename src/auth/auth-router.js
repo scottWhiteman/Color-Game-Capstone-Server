@@ -4,19 +4,12 @@ const AuthService = require('./auth-service');
 const authRouter = express.Router();
 const jsonBodyParser = express.json();
 
-// authRouter.route('/')
-//   .get((req, res, next) => {
-//     AuthService.getAllUsers(req.app.get('db'))
-//       .then(users => {
-//         res.json(users);
-//       })
-//       .catch(next);
-//   });
-
+//post login
 authRouter.post('/login', jsonBodyParser, (req, res, next) => {
   const { username, password } = req.body;
   const loginUser = { username, password };
 
+  //Check for password and username
   for (const [key, value] of Object.entries(loginUser)) {
     if (value == null) {
       return res.status(400).json({
@@ -25,6 +18,7 @@ authRouter.post('/login', jsonBodyParser, (req, res, next) => {
     }
   }
 
+  //Find username
   AuthService.getUserByUserName(req.app.get('db'), loginUser.username)
     .then(user => {
       if (!user) {
@@ -33,6 +27,7 @@ authRouter.post('/login', jsonBodyParser, (req, res, next) => {
         });
       }
 
+      //Check password if user is found
       return AuthService.comparePasswords(loginUser.password, user.password)
         .then(match => {
           if (!match) {
@@ -42,6 +37,7 @@ authRouter.post('/login', jsonBodyParser, (req, res, next) => {
           }
           const sub = user.username;
           const payload = { user_id: user.id };
+          //Send id, username and Token
           res.send({
             user_id: user.id,
             username: user.username,
