@@ -22,11 +22,6 @@ describe.only('Protected Endpoints', () => {
   afterEach('cleanup', () => helpers.cleanTables(db));
 
   describe('GET /api/scores/topscores', () => {
-    // it(`responds 200 with an array`, () => {
-    //   return supertest(app)
-    //     .get('/api/scores/topscores')
-    //     expect(200, Array.isArray())
-    // })
     beforeEach('insert data', () => {
       return helpers.seedColorgameTables(db, testUsers, testScores);
     });
